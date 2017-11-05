@@ -35,8 +35,10 @@ class WiFiNetworksScanReceiver: BroadcastReceiver() {
 
             // WiFi scan performed
             // Older devices might try to scan constantly. Allow them some rest by checking max. once every 0.5 seconds
-            if (System.currentTimeMillis() - lastCheck < 500)
+            if (System.currentTimeMillis() - lastCheck < 500) {
                 return
+            }
+
             lastCheck = System.currentTimeMillis()
 
             // Check our location permission, and request if needed
@@ -87,9 +89,7 @@ class WiFiNetworksScanReceiver: BroadcastReceiver() {
             }
 
             if (!notificationShown) {
-                // Disable previous notifications, to make sure that we only request permission for the
-                // currently available networks (and not at the wrong location)
-                notifManager!!.disableNetworkNotifications()
+                notifManager!!.disableWiFiNetworksNotifications()
             }
         }
 

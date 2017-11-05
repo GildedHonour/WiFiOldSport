@@ -5,24 +5,25 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.NotificationCompat
+import android.support.v4.app.NotificationCompat
+import android.R.string.cancel
 
-class NotificationManagerEx(val ctx: Context) {
-    val notifManag = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+class NotificationManagerEx(val ctx: Context?) {
+    var notiffMgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun askWiFiNetworkPermission(SSID: String, BSSID: String) {
         // Intent that will be used when the user allows the network
-        val addIntent = Intent(ctx, PermissionChangeReceiver::class.java)
+        val addIntent = Intent(ctx, WiFiNetworkPermissionManager::class.java)
         addIntent.putExtra("SSID", SSID).putExtra("BSSID", BSSID).putExtra("enable", true)
-        val addPendingIntent = PendingIntent.getBroadcast(context, 0, addIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val addPendingIntent = PendingIntent.getBroadcast(ctx, 0, addIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         // Intent that will be used when the user blocks the network
-        val disableIntent = Intent(ctx, PermissionChangeReceiver::class.java)
+        val disableIntent = Intent(ctx, WiFiNetworkPermissionManager::class.java)
         disableIntent.putExtra("SSID", SSID).putExtra("BSSID", BSSID).putExtra("enable", false)
-        val disablePendingIntent = PendingIntent.getBroadcast(context, 1, disableIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val disablePendingIntent = PendingIntent.getBroadcast(ctx, 1, disableIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         // Intent that will be used when the user's OS does not support notification actions
         val activityIntent = Intent(ctx, AskPermissionActivity::class.java)
         activityIntent.putExtra("SSID", SSID).putExtra("BSSID", BSSID)
-        val activityPendingIntent = PendingIntent.getActivity(context, 2, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val activityPendingIntent = PendingIntent.getActivity(ctx, 2, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         // Build the notification dynamically, based on the network name
         val res = ctx.getResources()
@@ -41,7 +42,20 @@ class NotificationManagerEx(val ctx: Context) {
                 .setContentIntent(activityPendingIntent)
                 .addAction(android.R.drawable.ic_delete, no, disablePendingIntent)
                 .addAction(android.R.drawable.ic_input_add, yes, addPendingIntent)
-        notifManag = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notifManag.notify(PERMISSION_NOTIFICATION_ID, notificationBuilder.build())
+        notiffMgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notiffMgr.notify(PERMISSION_NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    fun disableWiFiNetworksNotifications() {
+        notiffMgr.cancel(PERMISSION_NOTIFICATION_ID)
+    }
+
+    fun cancelPermissionRequest() {
+        notiffMgr.cancel(PERMISSION_NOTIFICATION_ID)
+    }
+
+    companion object {
+        val PERMISSION_NOTIFICATION_ID = 0
+        val LOCATION_NOTIFICATION_ID = 81
     }
 }
