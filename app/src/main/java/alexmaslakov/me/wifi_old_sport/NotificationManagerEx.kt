@@ -20,13 +20,9 @@ class NotificationManagerEx(val ctx: Context?) {
         val disableIntent = Intent(ctx, WiFiNetworkPermissionManager::class.java)
         disableIntent.putExtra("SSID", SSID).putExtra("BSSID", BSSID).putExtra("enable", false)
         val disablePendingIntent = PendingIntent.getBroadcast(ctx, 1, disableIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        // Intent that will be used when the user's OS does not support notification actions
-        val activityIntent = Intent(ctx, AskPermissionActivity::class.java)
-        activityIntent.putExtra("SSID", SSID).putExtra("BSSID", BSSID)
-        val activityPendingIntent = PendingIntent.getActivity(ctx, 2, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         // Build the notification dynamically, based on the network name
-        val res = ctx.getResources()
+        val res = ctx!!.resources
         val headerString = String.format(res.getString(R.string.permission_header), SSID)
         val permissionString = String.format(res.getString(R.string.ask_permission), SSID)
         val yes = res.getString(R.string.yes)
