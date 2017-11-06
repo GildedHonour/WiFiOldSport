@@ -4,47 +4,38 @@ import android.app.AlertDialog
 import android.app.ListActivity
 import android.content.Context
 import android.content.DialogInterface
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
-import android.net.wifi.WifiManager
 import android.view.*
 import android.widget.*
 
-abstract class WiFiAccessPointListBaseActivity: ListActivity() {
+abstract class WiFiAccessPointListBaseActivity : ListActivity() {
     protected var adapter: NetworkManagerAdapter? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
-    /**
-     * When bringing this activity to the foreground, refresh the network list.
-     */
     public override fun onResume() {
         super.onResume()
         refresh()
     }
 
-    /**
-     * Provide the option on the top right of the screen to remove all remembered networks
-     * @param menu The options menu (provided by the Android OS)
-     * @return success
-     */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        // This menu contains only one item: the removal of all networks altogether
-        inflater.inflate(R.menu.networkmanager, menu)
+        menuInflater.inflate(R.menu.networkmanager, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        return when (item.getItemId()) {
             R.id.action_removeall -> {
                 // Ask the user to confirm that he/she wants to remove all networks
                 confirmClearAll()
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -122,7 +113,7 @@ abstract class WiFiAccessPointListBaseActivity: ListActivity() {
             Log.v("PrivacyPolice", "Adding network " + SSIDinfo.name + " with signal strength " + SSIDinfo.signalStrength)
             // Color signal strength teal (if trusted) or pink (if blocked)
             var color = "teal"
-            if (SSIDinfo.accessPointSafety === ScanResultsChecker.AccessPointSafety.UNTRUSTED)
+            if (SSIDinfo.accessPointSafety === WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED)
                 color = "pink"
             var resourceName = "ic_wifi_signal_" + SSIDinfo.signalStrength + "_" + color
             if (SSIDinfo.signalStrength == -1)
@@ -134,7 +125,7 @@ abstract class WiFiAccessPointListBaseActivity: ListActivity() {
         }
     }
 
-    protected inner class NetworkAvailability(name: String, rssi: Int, accessPointSafety: ScanResultsChecker.AccessPointSafety) {
+    protected inner class NetworkAvailability(name: String, rssi: Int, accessPointSafety: WiFiAccessPointScanReceiver.AccessPointSafety) {
         var name: String? = null
 
         var signalStrength: Int = 0
@@ -144,7 +135,7 @@ abstract class WiFiAccessPointListBaseActivity: ListActivity() {
                 field = WifiManager.calculateSignalLevel(rssi, 5)
             }
 
-        var accessPointSafety: ScanResultsChecker.AccessPointSafety? = null
+        var accessPointSafety: WiFiAccessPointScanReceiver.AccessPointSafety? = null
 
         val isAvailable: Boolean
             get() = this.signalStrength >= 0
@@ -158,13 +149,12 @@ abstract class WiFiAccessPointListBaseActivity: ListActivity() {
 }
 
 
-class WiFiAccessPointListActivity: WiFiAccessPointListBaseActivity() {
+class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
     var ssid: String? = null
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         ssid = getIntent().getStringExtra("SSID")
         setTitle(ssid)
         adapter = MACManagerAdapter()
@@ -181,10 +171,12 @@ class WiFiAccessPointListActivity: WiFiAccessPointListBaseActivity() {
         builder.setPositiveButton(R.string.dialog_remove, DialogInterface.OnClickListener { dialog, id ->
             // Actually remove the BSSID from the 'trusted' list
             val prefs = PreferencesStorage(this@MACManagerActivity)
-            if (listItem.getAccessPointSafety() === ScanResultsChecker.AccessPointSafety.TRUSTED)
+            if (listItem.getAccessPointSafety() === ScanResultsChecker.AccessPointSafety.TRUSTED) {
                 prefs.removeAllowedBSSID(ssid, mac)
-            else
+            }             else {
                 prefs.removeBlockedBSSID(ssid, mac)
+            }
+
             this@MACManagerActivity.refresh()
         })
         builder.setNegativeButton(R.string.dialog_clearhotspots_no, DialogInterface.OnClickListener { dialog, id ->
@@ -210,7 +202,7 @@ class WiFiAccessPointListActivity: WiFiAccessPointListBaseActivity() {
     }
 
     inner class MACManagerAdapter : NetworkManagerAdapter() {
-        fun refresh() {
+        override fun refresh() {
             Log.v("PrivacyPolice", "Refreshing the SSID list adapter")
             // Use an ArrayMap so we can put available access points at the top
             networkList = ArrayList()
@@ -222,7 +214,7 @@ class WiFiAccessPointListActivity: WiFiAccessPointListBaseActivity() {
             // Add currently available access points that we trust to the list
             for (scanResult in scanResults) {
                 if (trustedMACs.contains(scanResult.BSSID)) {
-                    networkList.add(NetworkAvailability(scanResult.BSSID, scanResult.level, ScanResultsChecker.AccessPointSafety.TRUSTED))
+                    networkList.add(NetworkAvailability(scanResult.BSSID, scanResult.level, WiFiAccessPointScanReceiver.AccessPointSafety.TRUSTED))
                     trustedMACs.remove(scanResult.BSSID)
                 }
             }
@@ -230,14 +222,14 @@ class WiFiAccessPointListActivity: WiFiAccessPointListBaseActivity() {
             // Add currently available access points that we block to the list
             for (scanResult in scanResults) {
                 if (blockedMACs.contains(scanResult.BSSID)) {
-                    networkList.add(NetworkAvailability(scanResult.BSSID, scanResult.level, ScanResultsChecker.AccessPointSafety.UNTRUSTED))
+                    networkList.add(NetworkAvailability(scanResult.BSSID, scanResult.level, WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED))
                     blockedMACs.remove(scanResult.BSSID)
                 }
             }
 
             // Add all other (non-available) saved SSIDs to the list
-            trustedMACs.forEach { MAC -> networkList.add(NetworkAvailability(MAC, -99999, ScanResultsChecker.AccessPointSafety.TRUSTED)) }
-            blockedMACs.forEach { MAC -> networkList.add(NetworkAvailability(MAC, -99999, ScanResultsChecker.AccessPointSafety.UNTRUSTED)) }
+            trustedMACs.forEach { x -> networkList.add(NetworkAvailability(x, -99999, WiFiAccessPointScanReceiver.AccessPointSafety.TRUSTED)) }
+            blockedMACs.forEach { x -> networkList.add(NetworkAvailability(x, -99999, WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED)) }
             notifyDataSetChanged()
         }
     }
