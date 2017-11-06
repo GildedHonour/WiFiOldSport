@@ -15,7 +15,7 @@ class WiFiAccessPointDbManager(ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NA
     }
 
     companion object {
-        private val DATABASE_VERSION = 2
+        private val DATABASE_VERSION = 1
         private val DICTIONARY_TABLE_NAME = "wifi_old_sport"
         private val DICTIONARY_TABLE_CREATE = "CREATE TABLE " + DICTIONARY_TABLE_NAME + " (" +
                 KEY_WORD + " TEXT, " +
