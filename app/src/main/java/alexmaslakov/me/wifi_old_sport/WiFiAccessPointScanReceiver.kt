@@ -11,7 +11,7 @@ import android.net.wifi.WifiManager
 import android.os.Handler
 import android.util.Log
 
-class WiFiNetworksScanReceiver: BroadcastReceiver() {
+class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         var notifManager: NotificationManagerEx? = null
         enum class AccessPointSafety {
             ALWAYS_TRUSTED, THIS_TIME_TRUSTED, UNTRUSTED, UNKNOWN

@@ -7,7 +7,7 @@ import android.net.wifi.WifiManager
 import android.content.Intent
 import android.util.Log
 
-class WiFiNetworkPermissionManager: BroadcastReceiver() {
+class WiFiAccessPointPermissionReceiver: BroadcastReceiver() {
     private var ctx: Context? = null
     private var prefs: PreferencesStorage? = null
 
