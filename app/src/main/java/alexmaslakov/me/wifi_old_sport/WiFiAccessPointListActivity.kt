@@ -39,30 +39,16 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
         }
     }
 
-    /**
-     * Repopulate the list by getting the latest information on available networks, and
-     * combining them with networks stored in the preferences.
-     */
     fun refresh() {
         adapter!!.refresh()
     }
 
-    /**
-     * Ask the user for confirmation that he/she really wants to remove all trusted/untrusted
-     * APs, and remove them if the user confirms.
-     */
     abstract fun confirmClearAll()
 
-    /**
-     * Adapter that is responsible for populating the list of networks. In this case, the adapter
-     * also contains all logic to sort the networks by availability, and for getting the list from
-     * the preference storage.
-     */
     protected abstract inner class NetworkManagerAdapter : BaseAdapter() {
         protected var prefs: PreferencesStorage? = null
         protected var wifiManager: WifiManager? = null
         private var layoutInflater: LayoutInflater? = null
-        // Store the list of networks we know, together with their current availability
         protected var networkList: ArrayList<NetworkAvailability>? = null
 
         init {
@@ -75,11 +61,6 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
             refresh()
         }
 
-        /**
-         * Repopulate the list by getting the latest information on available networks, and
-         * combining them with networks stored in the preferences.
-         * Only displays networks that are stored in the preferences.
-         */
         abstract fun refresh()
 
         override fun getCount(): Int {
@@ -147,7 +128,6 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
         }
     }
 }
-
 
 class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
     var ssid: String? = null
