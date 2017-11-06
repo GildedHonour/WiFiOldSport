@@ -50,12 +50,10 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
 //            LocationAccess.checkAccessDisplayNotification(context)
 
         try {
-            val scanResults = wifiManager!!.getScanResults()
-            checkResults(scanResults)
-        } catch (npe: NullPointerException) {
-            Log.e("PrivacyPolice", "Null pointer exception when handling networks. Wi-Fi was probably suddenly disabled after a scan", npe)
+            checkResults(wifiManager!!.scanResults)
+        } catch (e: NullPointerException) {
+            Log.e("PrivacyPolice", "Null pointer exception when handling networks. Wi-Fi was probably suddenly disabled after a scan", e)
         }
-
     }
 
     private fun checkResults(scanResults: List<ScanResult>) {

@@ -97,11 +97,11 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val layout: LinearLayout
             // Recycle a previous view, if available
-            if (convertView == null) {
+            layout = if (convertView == null) {
                 // Not available, create a new view
-                layout = layoutInflater!!.inflate(R.layout.item_networkmanager, null) as LinearLayout
+                layoutInflater!!.inflate(R.layout.item_networkmanager, null) as LinearLayout
             } else {
-                layout = convertView as LinearLayout?
+                convertView as LinearLayout?
             }
 
             // Fill in the text part of the layout with the NetworkAvailability
@@ -163,7 +163,7 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
 
     override fun onListItemClick(listView: ListView, view: View, position: Int, id: Long) {
         val listItem = listView.getItemAtPosition(position) as NetworkAvailability
-        val mac = listItem.getName()
+        val mac = listItem.name
         Log.v("PrivacyPolice", "Asking for confirmation to remove mac $mac for network $ssid")
         // Ask for confirmation first
         val builder = AlertDialog.Builder(this)
