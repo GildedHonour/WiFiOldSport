@@ -13,17 +13,20 @@ class DbManager(ctx: Context): SQLiteOpenHelper(ctx, DATABASE_NAME, null, DATABA
         db.execSQL(ACCESS_POINTS_TABLE_CREATE)
     }
 
+    public fun getAll(): List<String> {
+        TODO()
+    }
+
     companion object {
         private val DATABASE_VERSION = 1
         private val WIFI_ACCESS_POINTS_TABLE_NAME = "wifi_access_points"
-        private val KEY_WORD = "id"
-        private val KEY_DEFINITION = "todo"
-
         private val ACCESS_POINTS_TABLE_CREATE =
                 "CREATE TABLE " + WIFI_ACCESS_POINTS_TABLE_NAME  +
                         " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "column2 TEXT" +
+                        "essid TEXT" +
+                        "bssid TEXT" +
+                        "ssid TEXT" +
                         ");"
 
         private val DATABASE_NAME = "wifi_old_sport.db"

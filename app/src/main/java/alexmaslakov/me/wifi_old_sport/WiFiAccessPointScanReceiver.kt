@@ -17,6 +17,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         private var wifiManager: WifiManager? = null
         private var connectivityManager: ConnectivityManager? = null
         private var context: Context? = null
+        val FREQUENCY = 500
     }
 
     enum class AccessPointSafety {
@@ -26,25 +27,20 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
     var notif: NotificationManagerEx? = null
     var db: DbManager? = null
 
-
-    private fun init(ctx: Context) {
-        wifiManager = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        connectivityManager = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        notif = NotificationManagerEx(ctx)
-        context = ctx
-        db = DbManager(ctx)
-    }
-
     override fun onReceive(ctx: Context, intent: Intent) {
         if (wifiManager == null) {
-            init(ctx)
+            wifiManager = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            connectivityManager = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            notif = NotificationManagerEx(ctx)
+            context = ctx
+            db = DbManager(ctx)
         }
         // Make sure the wakelockHandler keeps running (to prevent Android 6.0 and up from completely suspending our operations)
         WakelockHandler.getInstance(ctx).ensureAwake()
 
         // WiFi scan performed
         // Older devices might try to scan constantly. Allow them some rest by checking max. once every 0.5 seconds
-        if (System.currentTimeMillis() - lastCheck < 500) {
+        if (System.currentTimeMillis() - lastCheck < FREQUENCY) {
             return
         }
 
@@ -113,7 +109,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         // Check if we are in a CONNECTING state, or reassociate to force connection
         val handler = Handler()
         // Wait for 1 second before checking
-        handler.postDelayed(Runnable {
+        handler.postDelayed({
             val wifiState = connectivityManager!!.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
             if (!wifiState.isConnectedOrConnecting()) {
                 Log.i("PrivacyPolice", "Reassociating, because WifiManager doesn't seem to be eager to reconnect.")
