@@ -6,9 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper
 
 class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
     companion object {
-        private val DB_NAME = "wifi_old_sport.db"
+        private val DB_NAME = "data.sqlite"
         private val TAG = "DbHelper"
-        private val DB_VERSION = 2
+        private val DB_VERSION = 1
         private val WIFI_ACCESS_POINTS_TABLE_NAME = "wifi_access_points"
         private val ACCESS_POINTS_TABLE_CREATE =
                 "CREATE TABLE " + WIFI_ACCESS_POINTS_TABLE_NAME  +
@@ -28,7 +28,7 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(ACCESS_POINTS_TABLE_CREATE)
         populateDb(db)
-
+        db.close()
     }
 
     fun getAll(): List<String> {
@@ -37,5 +37,18 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
 
     private fun populateDb(db: SQLiteDatabase) {
         TODO()
+    }
+
+    //todo: bssid? ssid?
+    fun isBssIdAllowed(ssid: String): Boolean {
+
+        TODO()
+        val db = writableDatabase
+        db.execSQL("select from ??? where ssid = ???")
+        /*
+        SQLiteDatabase database = helper.getWritableDatabase();
+        database.insert(…);
+        database.close();
+        */
     }
 }
