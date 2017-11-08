@@ -31,24 +31,23 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
         db.close()
     }
 
-    fun getAll(): List<String> {
-        TODO()
-    }
-
     private fun populateDb(db: SQLiteDatabase) {
         TODO()
     }
 
     //todo: bssid? ssid?
     fun isBssIdAllowed(ssid: String): Boolean {
-
-        TODO()
         val db = writableDatabase
-        db.execSQL("select from ??? where ssid = ???")
-        /*
-        SQLiteDatabase database = helper.getWritableDatabase();
-        database.insert(…);
-        database.close();
-        */
+        val cursor = db.query("todo_table_name", arrayOf("id"), "ssid =?", arrayOf(ssid), null, null, null, null)
+        val res = cursor.count > 0
+        cursor.close()
+        return res
     }
 }
+
+
+/*
+SQLiteDatabase database = helper.getWritableDatabase();
+database.insert(…);
+database.close();
+*/
