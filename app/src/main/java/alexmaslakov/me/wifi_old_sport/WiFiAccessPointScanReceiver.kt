@@ -36,7 +36,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
             db = DbManager(ctx)
         }
         // Make sure the wakelockHandler keeps running (to prevent Android 6.0 and up from completely suspending our operations)
-        WakelockHandler.getInstance(ctx).ensureAwake()
+//        WakelockHandler.getInstance(ctx).ensureAwake()
 
         // WiFi scan performed
         // Older devices might try to scan constantly. Allow them some rest by checking max. once every 0.5 seconds
@@ -78,7 +78,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         // Check for every network in our network list whether it should be enabled
         for (network in networkList!!) {
             val networkSafety = getNetworkSafety(network, scanResults)
-            if (networkSafety == AccessPointSafety.TRUSTED) {
+            if (networkSafety == AccessPointSafety.TRUSTED_THIS_TIME_ONLY) {
                 connectTo(network.networkId)
             } else if (networkSafety == AccessPointSafety.UNTRUSTED) {
                 // Make sure all other networks are disabled, by disabling them separately
@@ -119,9 +119,15 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
     fun getNetworkSafety(network: WifiConfiguration, scanResults: List<ScanResult>): AccessPointSafety {
         // If all settings are disabled by the user, then allow every network
         // This effectively disables all of the app's functionalities
-        if (!(prefs!!.getEnableOnlyAvailableNetworks() || prefs!!.getOnlyConnectToKnownAccessPoints())) {
-            return AccessPointSafety.TRUSTED // Allow every network
-        }
+
+        //todo replace with sqlite
+//        if (!(prefs!!.getEnableOnlyAvailableNetworks() || prefs!!.getOnlyConnectToKnownAccessPoints())) {
+//            return AccessPointSafety.TRUSTED_THIS_TIME_ONLY // Allow every network
+//        }
+
+
+
+
         // If location access is disabled by the user (or if it is not granted to our app), allow
         // every network (as otherwise PrivacyPolice would block normal operation of the phone).
         // Rationale: a huge warning is displayed both as a notification, and in the main activity
@@ -137,7 +143,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         // in order to be discovered. Note that using hidden SSID's does not add any
         // real security , so it's best to avoid them whenever possible.
         if (network.hiddenSSID) {
-            return AccessPointSafety.TRUSTED
+            return AccessPointSafety.TRUSTED_THIS_TIME_ONLY
         }
 
         val plainSSID = network.SSID.replace("\"", "")
@@ -145,25 +151,28 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
                 .filter { it.SSID == plainSSID }
                 .forEach {
                     // Check whether the user wants to filter by MAC address
+                    //todo replace with sqlite
                     if (!prefs!!.getOnlyConnectToKnownAccessPoints()) { // Any MAC address is fair game
                         // Enabling now makes sure that we only want to connect when it is in range
-                        return AccessPointSafety.TRUSTED
+                        return AccessPointSafety.TRUSTED_THIS_TIME_ONLY
                     } else { // Check access point's MAC address
                         // Check if the MAC address is in the list of allowed MAC's for this SSID
+                        //todo replace with sqlite
                         val allowedBSSIDs = prefs!!.getAllowedBSSIDs(it.SSID)
-                        if (allowedBSSIDs.contains(it.BSSID)) {
-                            return AccessPointSafety.TRUSTED
+                        return if (allowedBSSIDs.contains(it.BSSID)) {
+                            AccessPointSafety.TRUSTED_THIS_TIME_ONLY
                         } else {
                             // Not an allowed BSSID
+                            //todo replace with sqlite
                             if (prefs!!.getBlockedBSSIDs(it.SSID).contains(it.BSSID)) {
                                 // This SSID was explicitly blocked by the user!
                                 Log.w("PrivacyPolice", "Spoofed network for " + it.SSID + " detected! (BSSID is " + it.BSSID + ")")
-                                return AccessPointSafety.UNTRUSTED
+                                AccessPointSafety.UNTRUSTED
                             } else {
                                 // We don't know yet whether the user wants to allow this network
                                 // Ask the user what needs to be done
-                                notifManager!!.askNetworkPermission(it.SSID, it.BSSID)
-                                return AccessPointSafety.UNKNOWN
+                                notif!!.askWiFiAccessPointPermission(it.SSID, it.BSSID)
+                                AccessPointSafety.UNKNOWN
                             }
                         }
                     }
