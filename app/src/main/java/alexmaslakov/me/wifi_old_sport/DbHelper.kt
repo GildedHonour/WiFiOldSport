@@ -12,10 +12,10 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
         private val WIFI_ACCESS_POINTS_TABLE_NAME = "wifi_access_points"
         private val ACCESS_POINTS_TABLE_CREATE =
                 "CREATE TABLE " + WIFI_ACCESS_POINTS_TABLE_NAME  +
-                        " (" +
+                        "(" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "essid TEXT" +
-                        "bssid TEXT" +
+                        "essid TEXT, " +
+                        "bssid TEXT, " +
                         "ssid TEXT" +
                         ");"
     }
@@ -27,9 +27,15 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(ACCESS_POINTS_TABLE_CREATE)
+        populateDb(db)
+
     }
 
-    public fun getAll(): List<String> {
+    fun getAll(): List<String> {
+        TODO()
+    }
+
+    private fun populateDb(db: SQLiteDatabase) {
         TODO()
     }
 }
