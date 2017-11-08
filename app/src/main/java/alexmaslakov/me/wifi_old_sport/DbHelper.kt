@@ -4,9 +4,11 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-class DbManager(ctx: Context): SQLiteOpenHelper(ctx, DATABASE_NAME, null, DATABASE_VERSION) {
+class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
     companion object {
-        private val DATABASE_VERSION = 1
+        private val DB_NAME = "wifi_old_sport.db"
+        private val TAG = "DbHelper"
+        private val DB_VERSION = 2
         private val WIFI_ACCESS_POINTS_TABLE_NAME = "wifi_access_points"
         private val ACCESS_POINTS_TABLE_CREATE =
                 "CREATE TABLE " + WIFI_ACCESS_POINTS_TABLE_NAME  +
@@ -16,10 +18,8 @@ class DbManager(ctx: Context): SQLiteOpenHelper(ctx, DATABASE_NAME, null, DATABA
                         "bssid TEXT" +
                         "ssid TEXT" +
                         ");"
-
-        private val DATABASE_NAME = "wifi_old_sport.db"
-        private val TAG = "DbManager"
     }
+
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
         TODO("not implemented")
