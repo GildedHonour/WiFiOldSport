@@ -23,15 +23,14 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.networkmanager, menu)
+        menuInflater.inflate(R.menu.wifi_access_points_manager, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.getItemId()) {
-            R.id.action_removeall -> {
-                // Ask the user to confirm that he/she wants to remove all networks
-                confirmClearAll()
+        return when (item.itemId) {
+            R.id.action_remove_all -> {
+                //todo
                 true
             }
 
@@ -46,14 +45,14 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
     abstract fun confirmClearAll()
 
     protected abstract inner class NetworkManagerAdapter : BaseAdapter() {
-        protected var prefs: PreferencesStorage? = null
+        protected var prefs: SharedPreferncesEx? = null
         protected var wifiManager: WifiManager? = null
         private var layoutInflater: LayoutInflater? = null
         protected var networkList: ArrayList<NetworkAvailability>? = null
 
         init {
             val context = this@WiFiAccessPointListBaseActivity.applicationContext
-            prefs = PreferencesStorage(context)
+            prefs = SharedPreferncesEx(context)
             wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
             layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
@@ -80,7 +79,7 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
             // Recycle a previous view, if available
             layout = if (convertView == null) {
                 // Not available, create a new view
-                layoutInflater!!.inflate(R.layout.item_networkmanager, null) as LinearLayout
+                layoutInflater!!.inflate(R.layout.wifi_access_points_manager_item, null) as LinearLayout
             } else {
                 convertView as LinearLayout?
             }
@@ -150,10 +149,10 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
         builder.setMessage(String.format(getResources().getString(R.string.dialog_removetrustedmac), mac))
         builder.setPositiveButton(R.string.dialog_remove, DialogInterface.OnClickListener { dialog, id ->
             // Actually remove the BSSID from the 'trusted' list
-            val prefs = PreferencesStorage(this@MACManagerActivity)
+            val prefs = SharedPreferncesEx(this@MACManagerActivity)
             if (listItem.getAccessPointSafety() === ScanResultsChecker.AccessPointSafety.TRUSTED) {
                 prefs.removeAllowedBSSID(ssid, mac)
-            }             else {
+            } else {
                 prefs.removeBlockedBSSID(ssid, mac)
             }
 

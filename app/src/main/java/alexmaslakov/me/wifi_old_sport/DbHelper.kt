@@ -38,9 +38,10 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
     //todo: bssid? ssid?
     fun isBssIdAllowed(ssid: String): Boolean {
         val db = writableDatabase
-        val cursor = db.query("todo_table_name", arrayOf("id"), "ssid =?", arrayOf(ssid), null, null, null, null)
+        val cursor = db.query("todo_table_name???", arrayOf("id"), "ssid =?", arrayOf(ssid), null, null, null, null)
         val res = cursor.count > 0
         cursor.close()
+        db.close()
         return res
     }
 }
