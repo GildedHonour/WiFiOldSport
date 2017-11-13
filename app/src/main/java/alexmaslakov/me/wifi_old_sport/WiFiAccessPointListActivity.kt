@@ -55,8 +55,6 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
             prefs = SharedPreferncesEx(context)
             wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
             layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-            // Creating the list for the first time
             refresh()
         }
 
@@ -75,32 +73,31 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
         }
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val layout: LinearLayout
-            // Recycle a previous view, if available
-            layout = if (convertView == null) {
+            val layout: LinearLayout = if (convertView == null) {
                 // Not available, create a new view
                 layoutInflater!!.inflate(R.layout.wifi_access_points_manager_item, null) as LinearLayout
             } else {
-                convertView as LinearLayout?
+                (convertView as LinearLayout?)!!
             }
 
-            // Fill in the text part of the layout with the NetworkAvailability
             val SSIDinfo = getItem(position) as NetworkAvailability
             val SSIDtext = layout.findViewById<View>(R.id.SSIDname) as TextView
             SSIDtext.text = SSIDinfo.name
-            // Make the 'signal strength' icon visible if the network is available
             val signalStrengthImage = layout.findViewById<View>(R.id.signalStrength) as ImageView
-            Log.v("PrivacyPolice", "Adding network " + SSIDinfo.name + " with signal strength " + SSIDinfo.signalStrength)
-            // Color signal strength teal (if trusted) or pink (if blocked)
-            var color = "teal"
-            if (SSIDinfo.accessPointSafety === WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED)
-                color = "pink"
-            var resourceName = "ic_wifi_signal_" + SSIDinfo.signalStrength + "_" + color
-            if (SSIDinfo.signalStrength == -1)
-                resourceName = "ic_wifi_unavailable_" + color
+            val colour = if (SSIDinfo.accessPointSafety === WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED) {
+                "pink"
+            } else {
+                "teal"
+            }
+
+            val resourceName = if (SSIDinfo.signalStrength == -1) {
+                "ic_wifi_unavailable_"
+            } else {
+                "ic_wifi_signal_" + SSIDinfo.signalStrength + "_"
+            } + colour
+
             val resourceId = resources.getIdentifier(resourceName, "drawable", packageName)
             signalStrengthImage.setImageResource(resourceId)
-
             return layout
         }
     }
@@ -135,9 +132,9 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ssid = getIntent().getStringExtra("SSID")
-        setTitle(ssid)
+        title = ssid
         adapter = MACManagerAdapter()
-        setListAdapter(adapter)
+        listAdapter = adapter
     }
 
     override fun onListItemClick(listView: ListView, view: View, position: Int, id: Long) {
@@ -146,7 +143,9 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
         Log.v("PrivacyPolice", "Asking for confirmation to remove mac $mac for network $ssid")
         // Ask for confirmation first
         val builder = AlertDialog.Builder(this)
-        builder.setMessage(String.format(getResources().getString(R.string.dialog_removetrustedmac), mac))
+
+        /*
+        builder.setMessage(String.format(resources.getString(R.string.dialog_removetrustedmac), mac))
         builder.setPositiveButton(R.string.dialog_remove, DialogInterface.OnClickListener { dialog, id ->
             // Actually remove the BSSID from the 'trusted' list
             val prefs = SharedPreferncesEx(this@MACManagerActivity)
@@ -161,13 +160,17 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
         builder.setNegativeButton(R.string.dialog_clearhotspots_no, DialogInterface.OnClickListener { dialog, id ->
             // User canceled
         })
+
         builder.show()
+        */
     }
 
     override fun confirmClearAll() {
         // Ask for confirmation first
         val builder = AlertDialog.Builder(this)
-        builder.setMessage(String.format(getResources().getString(R.string.dialog_clearhotspotsformac), ssid))
+
+        /*
+        builder.setMessage(String.format(resources.getString(R.string.dialog_clearhotspotsformac), ssid))
         builder.setPositiveButton(R.string.dialog_clearhotspots_yes, DialogInterface.OnClickListener { dialog, id ->
             // Actually clear the list
             val prefs = PreferencesStorage(this@MACManagerActivity)
@@ -178,16 +181,13 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
             // User canceled
         })
         builder.show()
+        */
     }
 
-    inner class MACManagerAdapter : NetworkManagerAdapter() {
+    private inner class MACManagerAdapter : NetworkManagerAdapter() {
         override fun refresh() {
-            Log.v("PrivacyPolice", "Refreshing the SSID list adapter")
-            // Use an ArrayMap so we can put available access points at the top
             networkList = ArrayList()
-
-            // Combine the access points that we know of with the access points that are available.
-            val scanResults = wifiManager.getScanResults()
+            val scanResults = wifiManager!!.scanResults
 
             val trustedMACs = prefs.getAllowedBSSIDs(ssid)
             // Add currently available access points that we trust to the list

@@ -52,3 +52,9 @@ SQLiteDatabase database = helper.getWritableDatabase();
 database.insert(…);
 database.close();
 */
+
+/*
+ssid -- parent, has many bssid
+bssid -- child, belongs to ssid
+
+ */
