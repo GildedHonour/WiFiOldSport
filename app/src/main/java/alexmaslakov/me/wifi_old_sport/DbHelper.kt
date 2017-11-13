@@ -14,9 +14,8 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
                 "CREATE TABLE " + WIFI_ACCESS_POINTS_TABLE_NAME  +
                         "(" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "essid TEXT, " +
-                        "bssid TEXT, " +
                         "ssid TEXT" +
+                        "bssid TEXT, " +
                         ");"
     }
 
@@ -54,7 +53,11 @@ database.close();
 */
 
 /*
-ssid -- parent, has many bssid
-bssid -- child, belongs to ssid
+ssid -- parent, has many bssid - name
+bssid -- child, belongs to ssid - MAC address
 
+
+todo - create 2 tables:
+    wifi_access_points(id, ssid)
+    wifi_access_point_items(id, wifi_access_point_ss_id, bssid, status_id)
  */

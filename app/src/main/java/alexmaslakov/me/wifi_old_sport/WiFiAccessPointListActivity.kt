@@ -140,8 +140,6 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
     override fun onListItemClick(listView: ListView, view: View, position: Int, id: Long) {
         val listItem = listView.getItemAtPosition(position) as NetworkAvailability
         val mac = listItem.name
-        Log.v("PrivacyPolice", "Asking for confirmation to remove mac $mac for network $ssid")
-        // Ask for confirmation first
         val builder = AlertDialog.Builder(this)
 
         /*
