@@ -168,7 +168,7 @@ class WiFiAccessPointListActivity : WiFiAccessPointListBaseActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(String.format(resources.getString(R.string.dialog_clearhotspotsformac), ssid))
         builder.setPositiveButton(R.string.dialog_clearhotspots_yes, DialogInterface.OnClickListener { _, id ->
-            // Actually clear the list
+            //   clear the list
             //todo remove all
             this@MACManagerActivity.refresh()
         })

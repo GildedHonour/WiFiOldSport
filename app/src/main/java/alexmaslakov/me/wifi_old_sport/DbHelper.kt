@@ -16,8 +16,23 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
                         "ssid TEXT" +
                         "bssid TEXT" +
                         ");"
+
+
+        private val WIFI_ACCESS_POINT_ITEMS_TABLE_NAME = "wifi_access_point_items"
+        private val ACCESS_POINTS_TABLE_CREATE =
+                "CREATE TABLE " + WIFI_ACCESS_POINT_ITEMS_TABLE_NAME  + "(" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "ssid_id INTEGER references " + WIFI_ACCESS_POINTS_TABLE_NAME + " (id)" +
+                        "bssid TEXT" +
+                        "status_id INTEGER" +
+                        ");"
     }
 
+    enum class WiFiAccessPointItemStatus(val x: Int) {
+        ENABLED(1),
+        ENABLED_ONCE(2),
+        DISABLED(3)
+    }
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
         TODO("not implemented")
@@ -58,5 +73,5 @@ bssid -- child, belongs to ssid - MAC address
 
 todo - create 2 tables:
     wifi_access_points(id, ssid)
-    wifi_access_point_items(id, wifi_access_point_ss_id, bssid, status_id)
+    wifi_access_point_items(id, wifi_access_point_ssid_id, bssid, status_id)
  */
