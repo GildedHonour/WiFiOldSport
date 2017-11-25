@@ -19,19 +19,13 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
 
 
         private val WIFI_ACCESS_POINT_ITEMS_TABLE_NAME = "wifi_access_point_items"
-        private val ACCESS_POINTS_TABLE_CREATE =
+        private val ACCESS_POINT_ITEMS_TABLE_CREATE =
                 "CREATE TABLE " + WIFI_ACCESS_POINT_ITEMS_TABLE_NAME  + "(" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "ssid_id INTEGER references " + WIFI_ACCESS_POINTS_TABLE_NAME + " (id)" +
                         "bssid TEXT" +
-                        "status_id INTEGER" +
+                        "trust_level_id INTEGER" +
                         ");"
-    }
-
-    enum class WiFiAccessPointItemStatus(val x: Int) {
-        ENABLED(1),
-        ENABLED_ONCE(2),
-        DISABLED(3)
     }
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
@@ -40,6 +34,7 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(ACCESS_POINTS_TABLE_CREATE)
+        db.execSQL(ACCESS_POINT_ITEMS_TABLE_CREATE)
         populateDb(db)
 //        db.close()
     }
@@ -49,7 +44,7 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
     }
 
     //todo: bssid? ssid?
-    fun isBssIdAllowed(ssid: String): Boolean {
+    fun isBssIdEnabled(ssid: String, bssid: String): Boolean {
         val db = writableDatabase
         val cursor = db.query("todo_table_name???", arrayOf("id"), "ssid =?", arrayOf(ssid), null, null, null, null)
         val res = cursor.count > 0
@@ -57,11 +52,19 @@ class DbHelper(ctx: Context): SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION) {
         db.close()
         return res
     }
+
+    fun getSingleBssId(ssid: String, )
 }
 
+enum class WifiAccessPointTrustLevel(val x: Int) {
+    UNKNOWN(0),
+    ALWAYS(1),
+    ONCE(2),
+    UNTRUSTED(3),
+}
 
 /*
-SQLiteDatabase database = helper.getWritableDatabase();
+SQLiteDatabase database = helper.writableDatabase;
 database.insert(…);
 database.close();
 */

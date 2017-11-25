@@ -84,7 +84,7 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
             val SSIDtext = layout.findViewById<View>(R.id.SSIDname) as TextView
             SSIDtext.text = SSIDinfo.name
             val signalStrengthImage = layout.findViewById<View>(R.id.signalStrength) as ImageView
-            val colour = if (SSIDinfo.accessPointSafety === WiFiAccessPointScanReceiver.AccessPointSafety.UNTRUSTED) {
+            val colour = if (SSIDinfo.accessPointSafety === WifiAccessPointTrustLevel.UNTRUSTED) {
                 "pink"
             } else {
                 "teal"
@@ -102,7 +102,7 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
         }
     }
 
-    protected inner class NetworkAvailability(name: String, rssi: Int, accessPointSafety: WiFiAccessPointScanReceiver.AccessPointSafety) {
+    protected inner class NetworkAvailability(name: String, rssi: Int, accessPointSafety: WifiAccessPointTrustLevel) {
         var name: String? = null
 
         var signalStrength: Int = 0
@@ -112,7 +112,7 @@ abstract class WiFiAccessPointListBaseActivity : ListActivity() {
                 field = WifiManager.calculateSignalLevel(rssi, 5)
             }
 
-        var accessPointSafety: WiFiAccessPointScanReceiver.AccessPointSafety? = null
+        var accessPointSafety: WifiAccessPointTrustLevel? = null
 
         val isAvailable: Boolean
             get() = this.signalStrength >= 0

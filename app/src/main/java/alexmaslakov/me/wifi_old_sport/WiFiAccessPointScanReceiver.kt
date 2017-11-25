@@ -20,9 +20,6 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         val FREQUENCY = 500
     }
 
-    enum class AccessPointSafety {
-        TRUSTED_ALWAYS, TRUSTED_THIS_TIME_ONLY, UNTRUSTED, UNKNOWN
-    }
 
     var notif: NotificationManagerEx? = null
     var db: DbManager? = null
@@ -52,7 +49,7 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
         try {
             checkResults(wifiManager!!.scanResults)
         } catch (e: NullPointerException) {
-            Log.e("PrivacyPolice", "Null pointer exception when handling networks. Wi-Fi was probably suddenly disabled after a scan", e)
+            Log.e("wifi_old_sport", "NullPointerException", e.message)
         }
     }
 
@@ -162,9 +159,17 @@ class WiFiAccessPointScanReceiver: BroadcastReceiver() {
                         return if (allowedBSSIDs.contains(it.BSSID)) {
                             AccessPointSafety.TRUSTED_THIS_TIME_ONLY
                         } else {
+
+
+                            // if (prefs!!.getBlockedBSSIDs(it.SSID).contains(it.BSSID)) {
+
                             // Not an allowed BSSID
                             //todo replace with sqlite
-                            if (prefs!!.getBlockedBSSIDs(it.SSID).contains(it.BSSID)) {
+                            //val aaa = dbHelper.getSingleBssId(it.SSID, it.BSSID)
+                            if (aaa.trustLevel == TrustLevel.UNTRUSTED) {
+
+
+
                                 // This SSID was explicitly blocked by the user!
                                 Log.w("PrivacyPolice", "Spoofed network for " + it.SSID + " detected! (BSSID is " + it.BSSID + ")")
                                 AccessPointSafety.UNTRUSTED
